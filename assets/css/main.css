@@ -1,1 +1,25 @@
 
+.fwpl-layout {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+}
+.fwpl-result {
+    text-align: center;
+    border: 1px solid #ddd;
+    padding: 1rem;
+    border-radius: 8px;
+}
+.member-directory {
+    margin: 0.5rem 0;
+}
+
+.dp_user_gifts th
+{
+    color: #d0af79 !important;
+}
+
+.dp_user_gifts td
+{
+    color: #000;
+}
