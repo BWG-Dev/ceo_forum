@@ -23,3 +23,75 @@
 {
     color: #000;
 }
+
+#user-grid{
+    justify-content: center;
+}
+
+.user-card {
+    width: 280px;
+    border: 1px solid #ddd;
+    padding: 10px;
+    border-radius: 8px;
+}
+.user-card img {
+    width: 100%;
+    height: auto;
+    border-radius: 4px;
+}
+.pagination-link {
+    margin: 0 5px;
+    cursor: pointer;
+}
+
+h3.member-directory.name{
+    font-size: 20px;
+    margin-top:20px;
+}
+
+h4.member-directory.company{
+    font-size: 17px;
+}
+
+p.member-directory.email{
+    font-size: 13px;
+}
+
+.ceo-user-directory {
+    grid-template-columns: repeat(4,1fr);
+    grid-gap: 10px;
+    display: grid;
+}
+
+#user-grid-container{
+    text-align: center;
+}
+
+@media (max-width: 1200px) {
+    .ceo-user-directory {
+        grid-template-columns: repeat(3,1fr);
+    }
+
+}
+
+@media (max-width: 768px) {
+    .ceo-user-directory {
+        grid-template-columns: repeat(2,1fr);
+    }
+    .user-card {
+        width: 200px;
+    }
+
+}
+
+@media (max-width: 420px) {
+    .ceo-user-directory {
+        grid-template-columns: repeat(1,1fr);
+    }
+    .user-card {
+        width: 300px;
+    }
+
+}
+
+

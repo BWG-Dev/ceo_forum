@@ -46,7 +46,62 @@ class Settings{
 
         add_shortcode('ceo_gift_table', array($this, 'gift_table'));
 
+        //OPTIN Logic
+        add_action('wp_footer', array($this, 'optin_logic'));
 
+        //Directory Shortcode
+        add_shortcode('ceo_directory', array($this, 'render_user_grid_ajax_shortcode'));
+
+    }
+
+    function render_user_grid_ajax_shortcode() {
+        ob_start(); ?>
+
+        <div id="user-grid-container">
+            <input type="text" id="user-search" placeholder="Search by name..." style="padding: 8px; width: 300px; margin-bottom: 20px;">
+            <div id="user-grid" style="display: flex; flex-wrap: wrap; gap: 20px;"></div>
+            <div id="user-pagination" style="margin-top: 20px;"></div>
+        </div>
+
+        <?php return ob_get_clean();
+    }
+
+    function optin_logic() {
+        if (!is_user_logged_in()) return;
+
+        $user_id = get_current_user_id();
+        $optin = get_user_meta($user_id, 'user_registration_optin', true);
+        $donor_id = get_user_meta($user_id, 'user_registration_donor_id', true);
+
+        if(empty($donor_id)){
+            return;
+        }
+
+        // If already has a Y or N, do not show the popup again
+        if (in_array($optin, ['Y', 'N'], true)) return;
+
+        ?>
+        <div id="directory-optin-popup" style="
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0,0,0,0.6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+    ">
+            <div style="background: white; padding: 30px; border-radius: 8px; max-width: 400px; text-align: center;">
+                <h2>Join Our Directory</h2>
+                <!--<p>Opt in to be listed in the Member Directory</p>-->
+                <button class="optin-answer" data-answer="Y" style="margin: 10px;">Yes, Opt in to be listed in the Member Directory</button>
+                <button class="optin-answer" data-answer="N" style="margin: 10px;">No, Do not show me in the Member Directory</button>
+            </div>
+        </div>
+
+        <script>
+
+        </script>
+        <?php
     }
 
     function sync_user_data($user_login, $user) {
@@ -69,6 +124,7 @@ class Settings{
         update_user_meta($user_id, 'user_registration_city', sanitize_text_field($_POST['user_registration_city'] ?? ''));
         update_user_meta($user_id, 'user_registration_state', sanitize_text_field($_POST['user_registration_state'] ?? ''));
         update_user_meta($user_id, 'user_registration_donor_id', sanitize_text_field($_POST['user_registration_donor_id'] ?? ''));
+        update_user_meta($user_id, 'user_registration_optin', sanitize_text_field($_POST['user_registration_optin'] ?? ''));
     }
 
     function ceo_show_extra_user_profile_fields($user) {
@@ -77,6 +133,8 @@ class Settings{
        $city = $user !='add-new-user' ? get_user_meta($user->ID, 'user_registration_city', true) : '';
        $state = $user !='add-new-user' ? get_user_meta($user->ID, 'user_registration_state', true) : '';
        $id = $user !='add-new-user' ? get_user_meta($user->ID, 'user_registration_donor_id', true) : '';
+       $optin = $user !='add-new-user' ? get_user_meta($user->ID, 'user_registration_optin', true) : '';
+
 
         ?>
         <h2>User Extra Info</h2>
@@ -103,6 +161,12 @@ class Settings{
                 <th><label for="user_registration_donor_id">Donor ID</label></th>
                 <td>
                     <input type="text" name="user_registration_donor_id" id="user_registration_donor_id" value="<?php echo esc_attr($id); ?>" class="regular-text" />
+                </td>
+            </tr>
+            <tr>
+                <th><label for="user_registration_optin">Opt-In</label></th>
+                <td>
+                    <input readonly type="text" name="user_registration_optin" id="user_registration_optin" value="<?php echo esc_attr($optin); ?>" class="regular-text" />
                 </td>
             </tr>
         </table>
@@ -274,8 +338,10 @@ class Settings{
     function restrict_admin_level_2_editable_roles( $roles ) {
         // Only affect users with the 'admin_level_2' role
 
-
         $excluded_roles = [ 'administrator', 'superuser', 'admin_level_2' ];
+
+        $current_user = wp_get_current_user();
+        if ( ! in_array( 'admin_level_2', $current_user->roles ) ) return $roles;
 
         foreach ( $excluded_roles as $role ) {
             if ( isset( $roles[ $role ] ) ) {

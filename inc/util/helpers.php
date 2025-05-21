@@ -489,6 +489,8 @@ function ceo_otherinfo_from_dp_sling_2025($donor_id){
     }
 }
 
+
+
 function ceo_get_profile($donor_id){
     $curl = curl_init();
     $url = "https://www.donorperfect.net/prod/xmlrequest.asp?apikey=".API_TH."&action=Select%20%2A%20from%20dp%20d%20inner%20join%20dpudf%20u%20on%20d.donor_id%20=%20u.donor_id%20where%20d.donor_id%20=%20" . intval($donor_id);
@@ -557,7 +559,7 @@ function ceo_update_user_roles($wp_user_id) {
             $attr = $field['@attributes'];
             $name = isset($attr['name']) ? $attr['name'] : '';
             $value = isset($attr['value']) ? $attr['value'] : '';
-            if($name && in_array($name, array('donor_id', 'first_name', 'last_name', 'email', 'EMPLOYER', 'city', 'state', 'SLI_COHORT', 'SLI_VERSION', 'AREA', 'AREA_2', 'MEMBER_YN', 'GENDER_MAIN'))){
+            if($name && in_array($name, array('donor_id', 'first_name', 'last_name', 'email', 'EMPLOYER', 'city', 'state', 'SLI_COHORT', 'SLI_VERSION', 'AREA', 'AREA_2', 'MEMBER_YN', 'GENDER_MAIN', 'OPT_IN_DIR'))){
                 $data[$name] = $value;
             }
         }
@@ -688,12 +690,49 @@ function ceo_update_user_roles($wp_user_id) {
     update_user_meta($wp_user_id, 'user_registration_city', $data['city']);
     update_user_meta($wp_user_id, 'user_registration_state', $data['state']);
 
+    if(!empty($data['OPT_IN_DIR'])){
+        update_user_meta($wp_user_id, 'user_registration_optin',$data['OPT_IN_DIR']);
+        $upt_id = get_user_meta($wp_user_id, '_upt_post_id', true);
+        update_post_meta(intval($upt_id), 'meta-user_registration_optin', $data['OPT_IN_DIR']);
+    }
+
+
     ceo_log_message('User <' . $data['email'] . '> with donor id # . ' .$donor_id . '  updated, data => ' .serialize($data));
 
     //update_dp_record_update ($donor_id);
 }
 
-//ceo_update_user_roles(9);
+function ceo_update_optin($donor_id, $optin_status = 'N'){
+    $curl = curl_init();
+    $url = "https://www.donorperfect.net/prod/xmlrequest.asp?apikey=".API_TH."&action=dp_save_udf_xml&params=@matching_id=$donor_id,@field_name=%27OPT_IN_DIR%27,@data_type=%27C%27,@char_value=%27$optin_status%27,@date_value=null,@number_value=null";
+    curl_setopt_array($curl, array(
+        CURLOPT_URL => $url,
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_ENCODING => "",
+        CURLOPT_MAXREDIRS => 10,
+        CURLOPT_TIMEOUT => 30,
+        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+        CURLOPT_CUSTOMREQUEST => "GET",
+        CURLOPT_POSTFIELDS => "",
+        CURLOPT_HTTPHEADER => array(
+            "Postman-Token: 2748c04e-7f5a-4bcd-ae05-c060e9519172",
+            "cache-control: no-cache"
+        ),
+    ));
+
+    $response = curl_exec($curl);
+    $err = curl_error($curl);
+
+    curl_close($curl);
+
+    /*if ($err) {
+        echo "cURL Error #:" . $err;
+    } else {
+        echo $response;
+    }*/
+}
+
+
 
 
 /**
@@ -718,6 +757,7 @@ function ceo_log_message( $message ) {
     // Write the message to the log file
     file_put_contents( $log_file, $formatted_message, FILE_APPEND );
 }
+
 
 
 
