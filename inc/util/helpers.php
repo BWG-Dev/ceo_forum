@@ -1,6 +1,6 @@
 <?php
 
-define( "API_TH", "MjyzWrB6wkzPoipFeubsMzeE1sCePxL%2frjWVKZQsBeZFAwSYdKTyByDHdCzBXWSODS%2flAUJPQkCdFWpRg91uYvoXx3V7iRphyo9nYYeRTkPT3KdD6f%2fKwxNboao2ZtuH" );
+define( "API_TH", "" );
 function ceo_get_gifts($donor_id){
 
     $curl = curl_init();
